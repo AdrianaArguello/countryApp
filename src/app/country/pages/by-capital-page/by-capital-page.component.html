@@ -1,2 +1,6 @@
 <country-search-input (searchText)="onSearch($event)" [placeholder]="'Buscar por capital'"/>
-<country-list [countries]="countries()"/>
+@if(isError()){
+    <span>No se encuentra esa capital</span>
+}@else{
+    <country-list [countries]="countries()"/>
+}
