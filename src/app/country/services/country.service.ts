@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { RestCountry } from '../interfaces/rest-countries.interface';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, delay, map, Observable, throwError } from 'rxjs';
 import { Country } from '../interfaces/country.interface';
 import { countryMapper } from '../mapper/country.mapper';
 
@@ -25,6 +25,15 @@ export class CountryService {
     return this.http.get<RestCountry[]>(`${API_URL}/name/${query}`)
     .pipe(
       map(countryMapper.mapRestCountryArrayToCountryArray),
+      delay(3000), 
+      catchError(() => {return throwError(() => new Error('no se pudo obtener paises con esa query'))})
+    );
+  }
+
+  searchCountryByAlphaCode(query: string): Observable<any>{
+    return this.http.get<RestCountry[]>(`${API_URL}/alpha/${query}`).pipe(
+      map(countryMapper.mapRestCountryArrayToCountryArray),
+      map((countries) => countries.at(0)),
       catchError(() => {return throwError(() => new Error('no se pudo obtener paises con esa query'))})
     );
   }

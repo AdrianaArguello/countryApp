@@ -1,2 +1,14 @@
-<country-search-input (searchText)="onSearch($event)" [placeholder]="'Buscar por capital'"/>
-<country-list [countries]="[]"/>
+@if(countryResource.error()){
+    <app-not-found />
+}
+
+@if (countryResource.isLoading()) {
+    <h5>Cargando...</h5>
+}
+
+@if (countryResource.hasValue()) {
+    <app-country-info [country]="countryResource.value()" />
+}
+
+
+
