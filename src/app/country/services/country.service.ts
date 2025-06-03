@@ -17,6 +17,14 @@ export class CountryService {
     return this.http.get<RestCountry[]>(`${API_URL}/capital/${query}`)
     .pipe(
       map(countryMapper.mapRestCountryArrayToCountryArray),
+      catchError(() => {return throwError(() => new Error('no se pudo obtener capital con esa query'))})
+    );
+  }
+
+  searchByCountry(query: string): Observable<Country[]>{
+    return this.http.get<RestCountry[]>(`${API_URL}/name/${query}`)
+    .pipe(
+      map(countryMapper.mapRestCountryArrayToCountryArray),
       catchError(() => {return throwError(() => new Error('no se pudo obtener paises con esa query'))})
     );
   }
