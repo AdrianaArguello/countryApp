@@ -1,1 +1,17 @@
-<country-list [countries]="[]" />
+<h1>Seleccione una region</h1>
+
+<div class="m-auto flex flex-row gap-2">
+  @for(region of regions; track region){
+    <button
+    class="btn btn-primary"
+    [class.btn-soft]="selected() === region"
+    (click)="selected.set(region)">{{region}}</button>
+  }
+</div>
+
+<country-list
+  [countries]="countryResource.value() ?? []"
+  [errorMessage]="countryResource.error()"
+  [isEmpty]="countryResource.value()?.length === 0"
+  [isLoading]="countryResource.isLoading()"
+/>

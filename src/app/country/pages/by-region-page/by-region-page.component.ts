@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
-import { SearchInputComponent } from '../../components/search-input/search-input.component';
+import { Component, inject, resource, signal } from '@angular/core';
 import { ListComponent } from '../../components/list/list.component';
+import { CountryService } from '../../services/country.service';
+import { firstValueFrom } from 'rxjs';
+import { Region } from '../../interfaces/region.type';
 
 @Component({
   selector: 'by-region-page',
@@ -8,8 +10,26 @@ import { ListComponent } from '../../components/list/list.component';
   templateUrl: './by-region-page.component.html'
 })
 export class ByRegionPageComponent {
+  public regions: Region[] = [
+    'Africa',
+    'Americas',
+    'Asia',
+    'Europe',
+    'Oceania',
+    'Antarctic',
+  ];
 
-  onSearch(value: string){
-    console.log('value', value)
-  }
+  countryService = inject(CountryService);
+  selected = signal('');
+
+  countryResource = resource({
+    request: () => ({ selected: this.selected() }),
+    loader: async ({ request }) => {
+      if(!request.selected) return [];
+
+      return await firstValueFrom(
+        this.countryService.searchByRegion(request.selected)
+      );
+    },
+  });
 }

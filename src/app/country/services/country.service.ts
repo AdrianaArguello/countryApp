@@ -12,8 +12,11 @@ const API_URL = 'https://restcountries.com/v3.1';
 })
 export class CountryService {
   private http = inject(HttpClient);
+
   private queryCacheCapital = new Map<string, Country[]>();
   private queryCacheCountry = new Map<string, Country[]>();
+  private queryCacheRegion = new Map<string, Country[]>();
+
 
   searchByCapital(query: string): Observable<Country[]>{
     query = query.toLowerCase();
@@ -51,6 +54,22 @@ export class CountryService {
       map(countryMapper.mapRestCountryArrayToCountryArray),
       map((countries) => countries.at(0)),
       catchError(() => {return throwError(() => new Error('no se pudo obtener paises con esa query'))})
+    );
+  }
+
+  searchByRegion(region: string): Observable<Country[]>{
+    region = region.toLowerCase();
+
+    if(this.queryCacheRegion.has(region)) {
+      return of(this.queryCacheRegion.get(region) ?? []);
+    }
+
+    return this.http.get<RestCountry[]>(`${API_URL}/region/${region}`)
+    .pipe(
+      map(countryMapper.mapRestCountryArrayToCountryArray),
+      tap(countries => this.queryCacheRegion.set(region, countries)),
+      delay(3000),
+      catchError(() => {return throwError(() => new Error('no se pudo obtener los paises con esa query'))})
     );
   }
 }

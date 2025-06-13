@@ -1,11 +1,10 @@
-import { Component, inject, resource, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { SearchInputComponent } from '../../components/search-input/search-input.component';
 import { ListComponent } from '../../components/list/list.component';
 import { CountryService } from '../../services/country.service';
-import { RestCountry } from '../../interfaces/rest-countries.interface';
-import { countryMapper } from '../../mapper/country.mapper';
-import { Country } from '../../interfaces/country.interface';
-import { firstValueFrom } from 'rxjs';
+import { of } from 'rxjs';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'by-capital-page',
@@ -14,17 +13,30 @@ import { firstValueFrom } from 'rxjs';
 })
 export class ByCapitalPageComponent {
   countryService = inject(CountryService);
-  query = signal('');
 
-  // resource esta en fase experimental
-  countryResource = resource({
-    request: () => ({ query: this.query() }), 
-    loader: async ({ request }) => {
-      if(!request.query) return [];
+  activatedRoute = inject(ActivatedRoute);
+  queryParam = this.activatedRoute.snapshot.queryParamMap.get('query') ?? '';
 
-      return await firstValueFrom(
-        this.countryService.searchByCapital(request.query)
-      );
+  query = signal(this.queryParam);
+
+  countryResource = rxResource({
+    request: () => ({ query: this.query() }),
+    loader: ({ request }) => {
+      if(!request.query) return of([]);
+
+      return this.countryService.searchByCapital(request.query);
     },
   });
+
+  // resource esta en fase experimental
+  // countryResource = resource({
+  //   request: () => ({ query: this.query() }),
+  //   loader: async ({ request }) => {
+  //     if(!request.query) return [];
+
+  //     return await firstValueFrom(
+  //       this.countryService.searchByCapital(request.query)
+  //     );
+  //   },
+  // });
 }
